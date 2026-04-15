@@ -55,6 +55,42 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showCategorySheet(MaterialCategory category) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final materials = kMaterials.where((m) => m.category == category).toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
+
+    final color = _categoryColorFor(category);
+    final label = materials.first.categoryLabel;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _CategorySheet(
+        label: label,
+        color: color,
+        materials: materials,
+        isDark: isDark,
+        onTap: (id) {
+          Navigator.pop(context);
+          _openMaterial(id);
+        },
+      ),
+    );
+  }
+
+  Color _categoryColorFor(MaterialCategory cat) {
+    switch (cat) {
+      case MaterialCategory.metals:      return AppColors.metals;
+      case MaterialCategory.energy:      return AppColors.energy;
+      case MaterialCategory.agriculture: return AppColors.agriculture;
+      case MaterialCategory.chemicals:   return AppColors.chemicals;
+      case MaterialCategory.minerals:    return AppColors.minerals;
+      case MaterialCategory.forestry:    return AppColors.forestry;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -404,7 +440,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ] else ...[
                       // ── Category legend ─────────────────────────────────
                       const SizedBox(height: 8),
-                      _CategoryLegend(isDark: isDark, muted: muted),
+                      _CategoryLegend(
+                        isDark: isDark,
+                        muted: muted,
+                        onCategoryTap: _showCategorySheet,
+                      ),
                     ],
                   ],
                 ),
@@ -494,19 +534,190 @@ class _StatPill extends StatelessWidget {
   }
 }
 
+// ── Category bottom sheet ─────────────────────────────────────────────────────
+class _CategorySheet extends StatelessWidget {
+  final String label;
+  final Color color;
+  final List<MaterialItem> materials;
+  final bool isDark;
+  final void Function(String id) onTap;
+
+  const _CategorySheet({
+    required this.label,
+    required this.color,
+    required this.materials,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final textColor = isDark ? AppColors.textDark : AppColors.textLight;
+    final secondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final muted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.75,
+      minChildSize: 0.4,
+      maxChildSize: 0.93,
+      builder: (_, controller) => Container(
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          boxShadow: [
+            BoxShadow(
+              color: isDark ? Colors.black38 : Colors.black12,
+              blurRadius: 24,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            const SizedBox(height: 12),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: color.withAlpha(isDark ? 40 : 22),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '${materials.length} materials',
+                    style: TextStyle(fontSize: 13, color: muted),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, color: muted, size: 20),
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            Divider(color: border, height: 1),
+
+            // Material list
+            Expanded(
+              child: ListView.separated(
+                controller: controller,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: materials.length,
+                separatorBuilder: (_, __) =>
+                    Divider(color: border, height: 1, indent: 70),
+                itemBuilder: (_, i) {
+                  final mat = materials[i];
+                  return InkWell(
+                    onTap: () => onTap(mat.id),
+                    child: Container(
+                      color: surface,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 14),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: color.withAlpha(isDark ? 35 : 18),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Center(
+                              child: Text(mat.emoji,
+                                  style: const TextStyle(fontSize: 22)),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  mat.name,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: textColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  mat.description,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 12, color: secondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(Icons.arrow_forward_ios_rounded,
+                              color: muted, size: 13),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ── Category legend ───────────────────────────────────────────────────────────
 class _CategoryLegend extends StatelessWidget {
   final bool isDark;
   final Color muted;
-  const _CategoryLegend({required this.isDark, required this.muted});
+  final void Function(MaterialCategory) onCategoryTap;
+
+  const _CategoryLegend({
+    required this.isDark,
+    required this.muted,
+    required this.onCategoryTap,
+  });
 
   static const _categories = [
-    ('Metals', AppColors.metals, Icons.bolt_rounded),
-    ('Energy', AppColors.energy, Icons.local_fire_department_rounded),
-    ('Agriculture', AppColors.agriculture, Icons.grass_rounded),
-    ('Chemicals', AppColors.chemicals, Icons.science_rounded),
-    ('Minerals', AppColors.minerals, Icons.layers_rounded),
-    ('Forestry', AppColors.forestry, Icons.park_rounded),
+    ('Metals', AppColors.metals, Icons.bolt_rounded, MaterialCategory.metals),
+    ('Energy', AppColors.energy, Icons.local_fire_department_rounded, MaterialCategory.energy),
+    ('Agriculture', AppColors.agriculture, Icons.grass_rounded, MaterialCategory.agriculture),
+    ('Chemicals', AppColors.chemicals, Icons.science_rounded, MaterialCategory.chemicals),
+    ('Minerals', AppColors.minerals, Icons.layers_rounded, MaterialCategory.minerals),
+    ('Forestry', AppColors.forestry, Icons.park_rounded, MaterialCategory.forestry),
   ];
 
   @override
@@ -534,28 +745,31 @@ class _CategoryLegend extends StatelessWidget {
           childAspectRatio: 1.55,
           children: _categories.map((c) {
             final color = c.$2;
-            return Container(
-              decoration: BoxDecoration(
-                color: color.withAlpha(isDark ? 28 : 16),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                    color: color.withAlpha(isDark ? 50 : 35), width: 1),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(c.$3, color: color, size: 22),
-                  const SizedBox(height: 6),
-                  Text(
-                    c.$1,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: color,
+            return GestureDetector(
+              onTap: () => onCategoryTap(c.$4),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color.withAlpha(isDark ? 28 : 16),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                      color: color.withAlpha(isDark ? 50 : 35), width: 1),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(c.$3, color: color, size: 22),
+                    const SizedBox(height: 6),
+                    Text(
+                      c.$1,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: color,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           }).toList(),
