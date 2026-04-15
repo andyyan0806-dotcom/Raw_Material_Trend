@@ -17,11 +17,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showResults = false;
   final _focusNode = FocusNode();
 
-  static const _featured = [
-    'copper', 'lithium', 'crude_oil', 'natural_gas',
-    'wheat', 'coffee', 'aluminum', 'cobalt',
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -70,283 +65,359 @@ class _HomeScreenState extends State<HomeScreen> {
     final muted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
     final border = isDark ? AppColors.borderDark : AppColors.borderLight;
     final primary = isDark ? AppColors.primaryLight : AppColors.primary;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: bg,
-      body: SafeArea(
-        child: GestureDetector(
-          onTap: () {
-            _focusNode.unfocus();
-            if (_searchController.text.isEmpty) {
-              setState(() => _showResults = false);
-            }
-          },
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Logo / heading
-                      Row(
+      body: GestureDetector(
+        onTap: () {
+          _focusNode.unfocus();
+          if (_searchController.text.isEmpty) {
+            setState(() => _showResults = false);
+          }
+        },
+        child: Stack(
+          children: [
+            // ── Decorative background orbs ──────────────────────────────
+            Positioned(
+              top: -80,
+              right: -60,
+              child: _Orb(
+                size: 280,
+                color: primary.withAlpha(isDark ? 18 : 12),
+              ),
+            ),
+            Positioned(
+              top: 120,
+              right: 40,
+              child: _Orb(
+                size: 120,
+                color: AppColors.agriculture.withAlpha(isDark ? 22 : 14),
+              ),
+            ),
+            Positioned(
+              bottom: screenHeight * 0.25,
+              left: -80,
+              child: _Orb(
+                size: 220,
+                color: AppColors.energy.withAlpha(isDark ? 16 : 10),
+              ),
+            ),
+
+            // ── Main content ─────────────────────────────────────────────
+            SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(28, 0, 28, 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: screenHeight * 0.54,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: primary,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.show_chart_rounded,
-                                color: Colors.white, size: 22),
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          // ── Brand row ───────────────────────────────────
+                          Row(
                             children: [
+                              Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      primary,
+                                      primary.withAlpha(180),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(11),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: primary.withAlpha(isDark ? 60 : 50),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(Icons.show_chart_rounded,
+                                    color: Colors.white, size: 20),
+                              ),
+                              const SizedBox(width: 10),
                               Text(
                                 'MaterialTrend',
                                 style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
                                   color: textColor,
-                                  letterSpacing: -0.5,
+                                  letterSpacing: -0.2,
                                 ),
-                              ),
-                              Text(
-                                'Raw material price intelligence',
-                                style: TextStyle(fontSize: 12, color: muted),
                               ),
                             ],
                           ),
+
+                          const SizedBox(height: 40),
+
+                          // ── Headline ────────────────────────────────────
+                          RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.w800,
+                                color: textColor,
+                                letterSpacing: -1.2,
+                                height: 1.12,
+                              ),
+                              children: [
+                                const TextSpan(text: "What's moving\n"),
+                                TextSpan(
+                                  text: 'raw material',
+                                  style: TextStyle(color: primary),
+                                ),
+                                const TextSpan(text: ' prices?'),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          Text(
+                            'Prices, drivers, forecasts and scenario\nanalysis — across 99 commodities.',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: secondary,
+                              height: 1.55,
+                            ),
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          // ── Stat pills ──────────────────────────────────
+                          Row(
+                            children: [
+                              _StatPill(
+                                label: '99 materials',
+                                icon: Icons.grain_rounded,
+                                primary: primary,
+                                isDark: isDark,
+                              ),
+                              const SizedBox(width: 8),
+                              _StatPill(
+                                label: '6 categories',
+                                icon: Icons.category_rounded,
+                                primary: primary,
+                                isDark: isDark,
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // ── Search bar ──────────────────────────────────
+                          Container(
+                            decoration: BoxDecoration(
+                              color: surface,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: _showResults
+                                    ? primary
+                                    : border,
+                                width: _showResults ? 1.5 : 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _showResults
+                                      ? primary.withAlpha(isDark ? 50 : 30)
+                                      : (isDark
+                                          ? AppColors.cardShadowDark
+                                          : const Color(0x18000000)),
+                                  blurRadius: _showResults ? 24 : 16,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: _searchController,
+                              focusNode: _focusNode,
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: textColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Search any commodity…',
+                                hintStyle: TextStyle(
+                                  color: muted,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.only(left: 6),
+                                  child: Icon(
+                                    Icons.search_rounded,
+                                    color: _showResults ? primary : muted,
+                                    size: 24,
+                                  ),
+                                ),
+                                suffixIcon: _searchController.text.isNotEmpty
+                                    ? IconButton(
+                                        icon: Icon(Icons.close_rounded,
+                                            color: muted, size: 20),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          setState(() => _showResults = false);
+                                        },
+                                      )
+                                    : null,
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 20),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 28),
-                      Text(
-                        'Search any raw material',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          color: textColor,
-                          letterSpacing: -0.8,
-                          height: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'See the trend, the reasons, and what comes next.',
-                        style: TextStyle(fontSize: 15, color: secondary, height: 1.4),
-                      ),
-                      const SizedBox(height: 20),
+                    ),
 
-                      // Search bar
+                    // ── Autocomplete results ──────────────────────────────
+                    if (_showResults && _results.isNotEmpty) ...[
+                      const SizedBox(height: 8),
                       Container(
                         decoration: BoxDecoration(
                           color: surface,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: _showResults ? primary : border,
-                            width: _showResults ? 1.5 : 1,
-                          ),
+                          border: Border.all(color: border),
                           boxShadow: [
                             BoxShadow(
                               color: isDark
                                   ? AppColors.cardShadowDark
-                                  : AppColors.cardShadowLight,
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
+                                  : const Color(0x12000000),
+                              blurRadius: 20,
+                              offset: const Offset(0, 6),
                             ),
                           ],
                         ),
-                        child: TextField(
-                          controller: _searchController,
-                          focusNode: _focusNode,
-                          style: TextStyle(fontSize: 16, color: textColor),
-                          decoration: InputDecoration(
-                            hintText: 'e.g. copper, lithium, palm oil…',
-                            hintStyle: TextStyle(color: muted, fontSize: 15),
-                            prefixIcon: Icon(Icons.search_rounded,
-                                color: _showResults ? primary : muted),
-                            suffixIcon: _searchController.text.isNotEmpty
-                                ? IconButton(
-                                    icon: Icon(Icons.close_rounded, color: muted),
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      setState(() => _showResults = false);
-                                    },
-                                  )
-                                : null,
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 16),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Column(
+                            children: _results.asMap().entries.map((entry) {
+                              final i = entry.key;
+                              final mat = entry.value;
+                              return InkWell(
+                                onTap: () => _openMaterial(mat.id),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 18, vertical: 14),
+                                  decoration: BoxDecoration(
+                                    border: i < _results.length - 1
+                                        ? Border(
+                                            bottom: BorderSide(color: border))
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 42,
+                                        height: 42,
+                                        decoration: BoxDecoration(
+                                          color: _categoryColor(mat.category)
+                                              .withAlpha(isDark ? 35 : 20),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Center(
+                                          child: Text(mat.emoji,
+                                              style: const TextStyle(
+                                                  fontSize: 20)),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              mat.name,
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                                color: textColor,
+                                              ),
+                                            ),
+                                            Text(
+                                              mat.unit,
+                                              style: TextStyle(
+                                                  fontSize: 11, color: muted),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      _CategoryChip(
+                                          label: mat.categoryLabel,
+                                          category: mat.category,
+                                          isDark: isDark),
+                                      const SizedBox(width: 6),
+                                      Icon(Icons.arrow_forward_ios_rounded,
+                                          color: muted, size: 13),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
                         ),
                       ),
-
-                      // Autocomplete results
-                      if (_showResults && _results.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: surface,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: border),
-                            boxShadow: [
-                              BoxShadow(
-                                color: isDark
-                                    ? AppColors.cardShadowDark
-                                    : AppColors.cardShadowLight,
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
+                    ] else if (_showResults && _results.isEmpty) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(28),
+                        decoration: BoxDecoration(
+                          color: surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: border),
+                        ),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Icon(Icons.search_off_rounded,
+                                  color: muted, size: 32),
+                              const SizedBox(height: 8),
+                              Text(
+                                'No results found',
+                                style: TextStyle(
+                                    color: textColor,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Try copper, lithium, wheat…',
+                                style:
+                                    TextStyle(color: secondary, fontSize: 13),
                               ),
                             ],
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
-                            child: Column(
-                              children: _results.asMap().entries.map((entry) {
-                                final i = entry.key;
-                                final mat = entry.value;
-                                return InkWell(
-                                  onTap: () => _openMaterial(mat.id),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 12),
-                                    decoration: BoxDecoration(
-                                      border: i < _results.length - 1
-                                          ? Border(
-                                              bottom:
-                                                  BorderSide(color: border))
-                                          : null,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Text(mat.emoji,
-                                            style:
-                                                const TextStyle(fontSize: 22)),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                mat.name,
-                                                style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: textColor,
-                                                ),
-                                              ),
-                                              Text(
-                                                mat.unit,
-                                                style: TextStyle(
-                                                    fontSize: 11, color: muted),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        _CategoryChip(
-                                            label: mat.categoryLabel,
-                                            category: mat.category,
-                                            isDark: isDark),
-                                        const SizedBox(width: 8),
-                                        Icon(Icons.chevron_right_rounded,
-                                            color: muted, size: 18),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ),
-                      ] else if (_showResults && _results.isEmpty) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: surface,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: border),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'No materials found. Try copper, lithium, wheat…',
-                              style: TextStyle(color: secondary, fontSize: 14),
-                            ),
-                          ),
-                        ),
-                      ],
-
-                      const SizedBox(height: 32),
-
-                      // Featured section
-                      Text(
-                        'FEATURED MATERIALS',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: muted,
-                          letterSpacing: 1.2,
                         ),
                       ),
-                      const SizedBox(height: 14),
+                    ] else ...[
+                      // ── Category legend ─────────────────────────────────
+                      const SizedBox(height: 8),
+                      _CategoryLegend(isDark: isDark, muted: muted),
                     ],
-                  ),
+                  ],
                 ),
               ),
-
-              // Featured grid
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverGrid(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final id = _featured[index];
-                      final mat = getMaterialById(id);
-                      if (mat == null) return const SizedBox();
-                      return _FeaturedCard(
-                        material: mat,
-                        isDark: isDark,
-                        onTap: () => _openMaterial(id),
-                      );
-                    },
-                    childCount: _featured.length,
-                  ),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 1.5,
-                  ),
-                ),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 32)),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
-}
 
-class _FeaturedCard extends StatelessWidget {
-  final MaterialItem material;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  const _FeaturedCard({
-    required this.material,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  Color get _categoryColor {
-    switch (material.category) {
+  Color _categoryColor(MaterialCategory cat) {
+    switch (cat) {
       case MaterialCategory.metals:
         return AppColors.metals;
       case MaterialCategory.energy:
@@ -361,69 +432,140 @@ class _FeaturedCard extends StatelessWidget {
         return AppColors.forestry;
     }
   }
+}
+
+// ── Decorative orb ────────────────────────────────────────────────────────────
+class _Orb extends StatelessWidget {
+  final double size;
+  final Color color;
+  const _Orb({required this.size, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    final surface = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
-    final textColor = isDark ? AppColors.textDark : AppColors.textLight;
-    final secondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: border),
-          boxShadow: [
-            BoxShadow(
-              color: isDark ? AppColors.cardShadowDark : AppColors.cardShadowLight,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(material.emoji, style: const TextStyle(fontSize: 22)),
-                const Spacer(),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: _categoryColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ],
-            ),
-            const Spacer(),
-            Text(
-              material.name,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: textColor,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              material.unitShort,
-              style: TextStyle(fontSize: 10, color: secondary),
-            ),
-          ],
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [color, color.withAlpha(0)],
         ),
       ),
     );
   }
 }
 
+// ── Stat pill ─────────────────────────────────────────────────────────────────
+class _StatPill extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color primary;
+  final bool isDark;
+  const _StatPill(
+      {required this.label,
+      required this.icon,
+      required this.primary,
+      required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: primary.withAlpha(isDark ? 28 : 16),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: primary),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Category legend ───────────────────────────────────────────────────────────
+class _CategoryLegend extends StatelessWidget {
+  final bool isDark;
+  final Color muted;
+  const _CategoryLegend({required this.isDark, required this.muted});
+
+  static const _categories = [
+    ('Metals', AppColors.metals, Icons.bolt_rounded),
+    ('Energy', AppColors.energy, Icons.local_fire_department_rounded),
+    ('Agriculture', AppColors.agriculture, Icons.grass_rounded),
+    ('Chemicals', AppColors.chemicals, Icons.science_rounded),
+    ('Minerals', AppColors.minerals, Icons.layers_rounded),
+    ('Forestry', AppColors.forestry, Icons.park_rounded),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 36),
+        Text(
+          'BROWSE BY CATEGORY',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: muted,
+            letterSpacing: 1.1,
+          ),
+        ),
+        const SizedBox(height: 14),
+        GridView.count(
+          crossAxisCount: 3,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 1.55,
+          children: _categories.map((c) {
+            final color = c.$2;
+            return Container(
+              decoration: BoxDecoration(
+                color: color.withAlpha(isDark ? 28 : 16),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                    color: color.withAlpha(isDark ? 50 : 35), width: 1),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(c.$3, color: color, size: 22),
+                  const SizedBox(height: 6),
+                  Text(
+                    c.$1,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Category chip ─────────────────────────────────────────────────────────────
 class _CategoryChip extends StatelessWidget {
   final String label;
   final MaterialCategory category;
@@ -471,3 +613,4 @@ class _CategoryChip extends StatelessWidget {
     );
   }
 }
+
