@@ -61,6 +61,10 @@ class _AnalysisView extends StatelessWidget {
         return AppColors.agriculture;
       case MaterialCategory.chemicals:
         return AppColors.chemicals;
+      case MaterialCategory.minerals:
+        return AppColors.minerals;
+      case MaterialCategory.forestry:
+        return AppColors.forestry;
     }
   }
 

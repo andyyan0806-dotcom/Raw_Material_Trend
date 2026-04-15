@@ -1,4 +1,4 @@
-enum MaterialCategory { metals, energy, agriculture, chemicals }
+enum MaterialCategory { metals, energy, agriculture, chemicals, minerals, forestry }
 
 class MaterialItem {
   final String id;
@@ -31,6 +31,10 @@ class MaterialItem {
         return 'Agriculture';
       case MaterialCategory.chemicals:
         return 'Chemicals';
+      case MaterialCategory.minerals:
+        return 'Minerals';
+      case MaterialCategory.forestry:
+        return 'Forestry';
     }
   }
 }

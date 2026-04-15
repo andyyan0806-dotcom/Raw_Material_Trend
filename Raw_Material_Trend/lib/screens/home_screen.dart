@@ -355,6 +355,10 @@ class _FeaturedCard extends StatelessWidget {
         return AppColors.agriculture;
       case MaterialCategory.chemicals:
         return AppColors.chemicals;
+      case MaterialCategory.minerals:
+        return AppColors.minerals;
+      case MaterialCategory.forestry:
+        return AppColors.forestry;
     }
   }
 
@@ -441,6 +445,10 @@ class _CategoryChip extends StatelessWidget {
         return AppColors.agriculture;
       case MaterialCategory.chemicals:
         return AppColors.chemicals;
+      case MaterialCategory.minerals:
+        return AppColors.minerals;
+      case MaterialCategory.forestry:
+        return AppColors.forestry;
     }
   }
 

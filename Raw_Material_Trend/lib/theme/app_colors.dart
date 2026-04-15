@@ -60,4 +60,6 @@ class AppColors {
   static const Color energy = Color(0xFFB45309);
   static const Color agriculture = Color(0xFF15803D);
   static const Color chemicals = Color(0xFF7C3AED);
+  static const Color minerals = Color(0xFF92400E);
+  static const Color forestry = Color(0xFF065F46);
 }
